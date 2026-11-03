@@ -1,0 +1,26 @@
+{
+  "name": "THUNDER Lounge OS",
+  "short_name": "THUNDER",
+  "description": "إدارة حديثة للصالة والطاولات والمبيعات",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A0A0D",
+  "theme_color": "#0A0A0D",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/thunder-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "business",
+    "finance",
+    "utilities"
+  ]
+}

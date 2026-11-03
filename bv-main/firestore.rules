@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Tenant credentials and data are managed by the trusted application server.
+    // Client SDK access stays closed until server-side Firebase Admin integration exists.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

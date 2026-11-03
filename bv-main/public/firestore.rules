@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Branches State Collection (Status, Freeze/Unfreeze, Heartbeat)
+    match /branches/{branchId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 2. Tenant Data (Tables, Invoices, Products, Revenue, Debts)
+    match /tenantData/{branchId} {
+      allow read, write: if true;
+    }
+
+    // 3. Security Breaches (Tamper attempts, devtools detection logs)
+    match /security_breaches/{breachId} {
+      allow create, read: if true;
+      allow update, delete: if false; // Immutable forensic logs
+    }
+
+    // 4. Audit Trail (All actions across admin and branches)
+    match /audit_logs/{logId} {
+      allow create, read: if true;
+      allow update, delete: if false; // Immutable audit trail
+    }
+
+    // 5. Global System Settings & Emergency Controls
+    match /systemControl/{controlId} {
+      allow read, write: if true;
+    }
+  }
+}

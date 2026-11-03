@@ -1,0 +1,8 @@
+{
+  "name": "X00716 NEXUS ENTERPRISE",
+  "description": "نظام إدارة الصالات ومراكز الألعاب المتطور مع خلفية الفضاء التفاعلية ثلاثية الأبعاد والتأثير الزجاجي",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
