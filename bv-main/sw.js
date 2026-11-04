@@ -1,13 +1,15 @@
-const CACHE_NAME = 'thunder-lounge-os-v16-shell';
+const CACHE_NAME = 'thunder-lounge-os-v18-shell';
 const APP_SHELL = [
     '/',
     '/index.html',
-    '/styles.css?v=15',
-    '/app.js?v=15',
+    '/styles.css?v=17',
+    '/app.js?v=16',
     '/ion-storm.js',
     '/backend-config.js',
     '/security.js',
     '/manifest.webmanifest',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
     '/thunder-icon.svg',
     '/adminx.html'
 ];

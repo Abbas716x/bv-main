@@ -84,6 +84,7 @@
 
     let S = createDefaultState();
     let liveTickerInterval = null;
+    let deferredInstallPrompt = null;
     let activeMenuCategoryId = null;
 
     // Toast Notification Dispatcher
@@ -240,6 +241,83 @@
             else openDrawer();
         } catch (e) {}
     }
+    async function toggleAppFullscreen() {
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+                return;
+            }
+            if (typeof document.documentElement.requestFullscreen !== 'function') {
+                toast('هذا المتصفح لا يدعم ملء الشاشة من الصفحة. ثبّت التطبيق من المتصفح لفتح الواجهة بدون شريط المتصفح.', 'warn', 5000);
+                return;
+            }
+            await document.documentElement.requestFullscreen();
+        } catch (error) {
+            console.error('Unable to change fullscreen mode:', error);
+            toast('تعذر تفعيل ملء الشاشة. جرّب تثبيت التطبيق أو استخدم متصفحاً يدعم هذه الميزة.', 'warn', 5000);
+        }
+    }
+
+    async function installApp() {
+        if (deferredInstallPrompt) {
+            const installPrompt = deferredInstallPrompt;
+            deferredInstallPrompt = null;
+            try {
+                await installPrompt.prompt();
+                const choice = await installPrompt.userChoice;
+                if (choice?.outcome === 'accepted') {
+                    $('#install-trigger')?.setAttribute('hidden', '');
+                }
+            } catch (error) {
+                console.error('Unable to install the PWA:', error);
+                toast('تعذر فتح نافذة تثبيت التطبيق. استخدم قائمة المتصفح لاختيار تثبيت التطبيق.', 'warn', 5000);
+            }
+            return;
+        }
+
+        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        toast(
+            isIos
+                ? 'لتثبيت التطبيق: اضغط مشاركة في Safari ثم اختر إضافة إلى الشاشة الرئيسية.'
+                : 'افتح قائمة المتصفح واختر «تثبيت التطبيق» أو «Install app».',
+            'info',
+            6000
+        );
+    }
+
+    function setupPwaInstall() {
+        const button = $('#install-trigger');
+        if (!button) return;
+
+        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+            window.matchMedia('(display-mode: fullscreen)').matches ||
+            navigator.standalone === true;
+        if (!isInstalled) button.removeAttribute('hidden');
+
+        window.addEventListener('beforeinstallprompt', event => {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            button.removeAttribute('hidden');
+        });
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            button.setAttribute('hidden', '');
+            toast('تم تثبيت تطبيق THUNDER بنجاح.', 'success');
+        });
+    }
+
+    function syncFullscreenButton() {
+        const button = $('#fullscreen-trigger');
+        if (!button) return;
+        const isFullscreen = Boolean(document.fullscreenElement);
+        button.classList.toggle('is-fullscreen', isFullscreen);
+        button.setAttribute('aria-label', isFullscreen ? 'الخروج من ملء الشاشة' : 'تفعيل ملء الشاشة');
+        button.setAttribute('title', isFullscreen ? 'الخروج من ملء الشاشة' : 'ملء الشاشة');
+    }
+
     function closeDrawer() {
         try {
             const drawer = $('#drawer');
@@ -2089,6 +2167,9 @@
     async function initApp() {
         try {
             closeDrawer();
+            syncFullscreenButton();
+            setupPwaInstall();
+            document.addEventListener('fullscreenchange', syncFullscreenButton);
             setupKeyboardShortcuts();
             setupGlobalEventDelegation();
 
@@ -2173,7 +2254,7 @@
 
     // Public Surface Bindings
     Object.assign(window, {
-        openDrawer, closeDrawer, toggleDrawer, switchView, openModal, closeModal,
+        openDrawer, closeDrawer, toggleDrawer, toggleAppFullscreen, installApp, switchView, openModal, closeModal,
         renderTables, openAddTableModal, suggestTable, confirmAddTable, openTableDetail,
         renderTableDetail, updateTableCustomer, updateTableDiscount,
         changeQty, pauseItem, resumeItem, removeItem,
