@@ -2474,7 +2474,7 @@ div.table-card {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    #drawer, #navigation-trigger,
+    #drawer, #navigation-trigger, .fullscreen-trigger, .install-trigger,
     div.quick-card, div.stat-card, div.debt-card, button.menu-category-card,
     article.menu-product-card, div.item-box, .picker-option, div.table-card {
         transition: none !important;
@@ -2490,6 +2490,71 @@ div.table-card {
 }
 
 #navigation-trigger svg { width: 29px !important; height: 29px !important; }
+
+.fullscreen-trigger {
+    position: fixed !important;
+    top: max(16px, env(safe-area-inset-top)) !important;
+    right: max(76px, calc(env(safe-area-inset-right) + 76px)) !important;
+    z-index: 1100 !important;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(152, 224, 248, .7);
+    border-radius: 17px;
+    color: #fff;
+    background: linear-gradient(145deg, rgba(0, 123, 167, .88), rgba(92, 63, 154, .86) 55%, rgba(255, 45, 149, .78));
+    box-shadow: 0 7px 22px rgba(0,0,0,.36), 0 0 22px rgba(0,123,167,.27), inset 0 1px rgba(255,255,255,.38);
+    backdrop-filter: blur(16px);
+    cursor: pointer;
+    transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+}
+
+.fullscreen-trigger svg {
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.fullscreen-trigger .fullscreen-exit-icon,
+.fullscreen-trigger.is-fullscreen .fullscreen-enter-icon { display: none; }
+.fullscreen-trigger.is-fullscreen .fullscreen-exit-icon { display: block; }
+.fullscreen-trigger:hover { transform: translateY(-2px) scale(1.04); filter: brightness(1.15); }
+.fullscreen-trigger:active { transform: scale(.95); }
+
+.install-trigger {
+    position: fixed !important;
+    top: max(16px, env(safe-area-inset-top)) !important;
+    right: max(136px, calc(env(safe-area-inset-right) + 136px)) !important;
+    z-index: 1100 !important;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 91, 174, .72);
+    border-radius: 17px;
+    color: #fff;
+    background: linear-gradient(145deg, rgba(255, 45, 149, .84), rgba(92, 63, 154, .86) 55%, rgba(0, 123, 167, .8));
+    box-shadow: 0 7px 22px rgba(0,0,0,.36), 0 0 22px rgba(255,45,149,.24), inset 0 1px rgba(255,255,255,.38);
+    backdrop-filter: blur(16px);
+    cursor: pointer;
+    transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+}
+
+.install-trigger[hidden] { display: none !important; }
+.install-trigger svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.install-trigger:hover { transform: translateY(-2px) scale(1.04); filter: brightness(1.15); }
+.install-trigger:active { transform: scale(.95); }
+
+html:fullscreen, html:fullscreen body {
+    width: 100%;
+    min-height: 100%;
+    background: #0A0A0A;
+}
 
 #drawer.drawer, #drawer {
     height: 70px !important;

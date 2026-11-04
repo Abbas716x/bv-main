@@ -63,6 +63,31 @@
         } catch (e) {}
     }
 
+    async function parseApiResponse(response, operation) {
+        const body = await response.text();
+        if (!body.trim()) {
+            throw new Error(`الخادم لم يرجع بيانات أثناء ${operation} (HTTP ${response.status}). تحقق من نشر وتشغيل خادم Node/Express.`);
+        }
+
+        try {
+            return { response, result: JSON.parse(body) };
+        } catch (error) {
+            console.error(`[NEXUS API] ${operation} returned a non-JSON response:`, error);
+            throw new Error(`ردّ الخادم غير صالح أثناء ${operation} (HTTP ${response.status}). غالباً الموقع المنشور لا يوجّه طلبات /api إلى خادم التطبيق.`);
+        }
+    }
+
+    async function requestApiJson(url, options, operation) {
+        let response;
+        try {
+            response = await fetch(url, options);
+        } catch (error) {
+            console.error(`[NEXUS API] ${operation} request failed:`, error);
+            throw new Error('تعذر الاتصال بخادم التطبيق. تأكد من نشر نسخة Node/Express وأن عنوان الموقع يشير إلى الخادم الصحيح.');
+        }
+        return parseApiResponse(response, operation);
+    }
+
     function flashSaveIndicator(state = 'saved') {
         try {
             const el = document.getElementById('save-indicator');
@@ -111,12 +136,11 @@
         if (!cleanUser || !cleanPass) throw new Error('يرجى ملء جميع الحقول');
 
         setFbStatus('sync', 'AUTH');
-        const response = await fetch('/api/auth/login', {
+        const { response, result } = await requestApiJson('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             body: JSON.stringify({ username: cleanUser, password: cleanPass })
-        });
-        const result = await response.json();
+        }, 'تسجيل الدخول');
         if (!response.ok || !result.ok) {
             setFbStatus('offline', 'AUTH_ERR');
             if (result.status === 'frozen' && window.SecurityEngine) {
@@ -139,7 +163,15 @@
         const dataResponse = await fetch(`/api/branches/${encodeURIComponent(currentTenant.id)}/data`, {
             headers: { Authorization: `Bearer ${result.token}`, Accept: 'application/json' }
         });
-        const tenantResult = await dataResponse.json();
+        let tenantResult;
+        try {
+            ({ result: tenantResult } = await parseApiResponse(dataResponse, 'تحميل بيانات الفرع'));
+        } catch (error) {
+            sessionStorage.removeItem(SESSION_TOKEN_KEY);
+            localStorage.removeItem(SESSION_BRANCH_KEY);
+            currentTenant = null;
+            throw error;
+        }
         if (!dataResponse.ok || !tenantResult.ok) {
             sessionStorage.removeItem(SESSION_TOKEN_KEY);
             localStorage.removeItem(SESSION_BRANCH_KEY);
@@ -193,7 +225,7 @@
             const response = await fetch('/api/auth/session', {
                 headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
             });
-            const result = await response.json();
+            const { result } = await parseApiResponse(response, 'التحقق من الجلسة');
             if (!response.ok || result.role !== 'branch' || !result.branch) {
                 setFbStatus('offline', 'AUTH_ERR');
                 if (response.status === 401) {
@@ -316,7 +348,7 @@
                 },
                 body: JSON.stringify({ data: state })
             });
-            const serverResult = await serverResponse.json();
+            const { result: serverResult } = await parseApiResponse(serverResponse, 'حفظ بيانات الفرع');
             if (!serverResponse.ok || !serverResult.ok) {
                 throw new Error(serverResult.error || 'رفض الخادم حفظ بيانات الفرع');
             }

@@ -1,0 +1,17 @@
+name = "716iq"
+main = "worker.js"
+compatibility_date = "2026-11-04"
+workers_dev = true
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+html_handling = "none"
+run_worker_first = ["/api/*", "/admin", "/adminx"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "thunder-lounge-data"
+database_id = "65ba625f-75b9-45d5-b6ad-28eeea63808b"
+migrations_dir = "migrations"

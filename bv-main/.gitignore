@@ -7,3 +7,6 @@ coverage/
 .env*
 !.env.example
 data/
+.wrangler/
+.dev.vars
+.dev.vars.*
