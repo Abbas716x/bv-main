@@ -1,14 +1,15 @@
-const CACHE_NAME = 'thunder-lounge-os-v10-shell';
+const CACHE_NAME = 'thunder-lounge-os-v16-shell';
 const APP_SHELL = [
     '/',
     '/index.html',
-    '/styles.css?v=14',
-    '/app.js?v=13',
+    '/styles.css?v=15',
+    '/app.js?v=15',
     '/ion-storm.js',
     '/backend-config.js',
     '/security.js',
     '/manifest.webmanifest',
-    '/thunder-icon.svg'
+    '/thunder-icon.svg',
+    '/adminx.html'
 ];
 
 self.addEventListener('install', event => {

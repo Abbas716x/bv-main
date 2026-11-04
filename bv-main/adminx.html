@@ -604,17 +604,22 @@
 
         // Safe Background Server Sync (Zero 405 Errors on GitHub Pages & Static Hosts)
         async function safeApiSync(endpoint, options = {}) {
-            // Only perform local server requests if running on local fullstack node/express server
-            const isLocalServer = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '3000');
-            if (!isLocalServer) return null;
-
             try {
                 options.headers = options.headers || {};
                 if (currentAdminToken) options.headers['Authorization'] = `Bearer ${currentAdminToken}`;
                 options.headers['Accept'] = 'application/json';
                 if (options.body) options.headers['Content-Type'] = 'application/json';
                 const res = await fetch(endpoint, options);
-                const result = await res.json();
+                const body = await res.text();
+                if (!body.trim()) {
+                    throw new Error(`الخادم لم يرجع بيانات (${res.status})`);
+                }
+                let result;
+                try {
+                    result = JSON.parse(body);
+                } catch {
+                    throw new Error(`ردّ API غير صالح (${res.status}). تأكد من أن Worker يعالج مسارات /api.`);
+                }
                 if (!res.ok) throw new Error(result.error || `تعذر تنفيذ الطلب (${res.status})`);
                 return result;
             } catch (err) {
